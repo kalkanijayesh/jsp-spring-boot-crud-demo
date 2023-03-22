@@ -1,7 +1,9 @@
 package com.example.demo.DTOs;
 
 import com.example.demo.Enums.Designation;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
     private Integer userId;

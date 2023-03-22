@@ -96,6 +96,8 @@ public class MainController {
         System.out.println(userId.substring(3));
         UserDto userById = userService.getUserById(Integer.parseInt(userId.substring(3)));
         model.addAttribute("user", userById);
+
+        // TODO: 22/03/23 We need to handle the designation automatically instead of manually !!
         model.addAttribute("selectedDesignation", userById.getDesignation().name());
         model.addAttribute("userDtoObject", new UserDto());
         model.addAttribute("designations",
