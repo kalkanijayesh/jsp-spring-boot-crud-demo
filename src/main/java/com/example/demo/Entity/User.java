@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.example.demo.DTOs.UserDto;
+
 import javax.persistence.*;
 
 @Entity
@@ -55,6 +57,14 @@ public class User {
 
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
+    }
+
+    public static UserDto convertToUserDTO(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setFirstName(user.getUserDetails().getFirstName());
+        //userDto.setFirstName(user.getUserDetails().getFirstName());
+        //userDto.setFirstName(user.getUserDetails().getFirstName());
+        return userDto;
     }
 
     @Override
