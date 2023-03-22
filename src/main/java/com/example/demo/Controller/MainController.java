@@ -26,63 +26,71 @@ import java.util.stream.Collectors;
 public class MainController {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    UserDetailsServiceByDatabase userDetailsService;
+    private UserDetailsServiceByDatabase userDetailsService;
 
     @Autowired
-    Mapper mapper;
+    private Mapper mapper;
 
-    @RequestMapping("/firstPage")
-    public String firstPage(Model model){
+    @RequestMapping(value = "/login")
+    private String login() {
+        return "login";
+    }
+
+    @RequestMapping("/home")
+    public String home(Model model) {
         List<UserDto> users = userService.getAllUser();
-        System.out.println(users);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        List<String> roles = authentication.getAuthorities().stream()
-                .map(r -> r.getAuthority()).collect(Collectors.toList());
-        System.out.println(roles.get(0));
-
-        model.addAttribute("role", roles.get(0));
-        model.addAttribute("ListOfUsers",users);
-        return "firstPage";
+        String currentRole = userService.getRoleOfLoggedInUser();
+        model.addAttribute("users", users);
+        model.addAttribute("role", currentRole);
+        model.addAttribute("viewAccess", true);
+        model.addAttribute("editAccess", (currentRole.equals("ROLE_MANAGER")
+                || currentRole.equals("ROLE_DY_MANAGER")));
+        model.addAttribute("deleteAccess", currentRole.equals("ROLE_MANAGER"));
+        return "home";
     }
 
-    @RequestMapping("/getAllUser")
-    public List<UserDto> getAllUSer(){
-        return userService.getAllUser();
+    @RequestMapping("/view/{id}")
+    public String updateUser(@PathVariable("id") String userId, Model model) throws IOException {
+        UserDto userById = userService.getUserById(Integer.parseInt(userId.substring(3)));
+        model.addAttribute("user", userById);
+        System.out.println(userById);
+        return "view";
     }
 
+    @RequestMapping("/delete/{id}")
+    public void deleteUser(@PathVariable("id") String userId, HttpServletResponse resp) throws IOException {
+        userService.delete(Integer.parseInt(userId.substring(3)));
+        resp.sendRedirect("/home");
+    }
+
+    // =====================================================
+
+    // TODO: 22/03/23 Check why /createRecord and /createUser two different endpoints ??
     @RequestMapping(value = "/createRecord")
     public void saveUser(@ModelAttribute("user") UserDto user, Model model, HttpServletResponse resp) throws IOException {
-        System.out.println(user);
         User interUser = Mapper.mapToUser(user);
         UserDetails interUserDetail = Mapper.mapToUserDetails(user);
         User user1 = userService.saveUser(interUser);
         interUserDetail.setUser(user1);
         userDetailsService.saveUserDetails(interUserDetail);
-        System.out.println("user saved");
         List<UserDto> users = userService.getAllUser();
-        model.addAttribute("ListOfUsers",users);
-        resp.sendRedirect("/firstPage");
+        model.addAttribute("ListOfUsers", users);
+        resp.sendRedirect("/home");
     }
 
     @RequestMapping(value = "/createUser")
-    public String createUser(Model model){
+    public String createUser(Model model) {
         Designation[] values = Designation.values();
         model.addAttribute("user", new UserDto());
         model.addAttribute("designations", values);
         return "createUser";
     }
 
-    @RequestMapping("/delete/{id}")
-    public void deleteUser(@PathVariable("id") String userId, HttpServletResponse resp) throws IOException {
-       // System.out.println(userId.substring(3));
-        userService.delete(Integer.parseInt(userId.substring(3)));
-        resp.sendRedirect("/firstPage");
-    }
 
+    // TODO: 22/03/23 Please handle edit action with save/create_user rest endpoint. (Or check online how we can handle new or edit record with the same method/functions
     @RequestMapping("/edit/{id}")
     public String editUser(@PathVariable("id") String userId, Model model) throws IOException {
         System.out.println(userId.substring(3));
@@ -90,37 +98,23 @@ public class MainController {
         model.addAttribute("user", userById);
         model.addAttribute("selectedDesignation", userById.getDesignation().name());
         model.addAttribute("userDtoObject", new UserDto());
-        model.addAttribute("designations", Arrays.asList(Designation.MANAGER.name(), Designation.DIV_MANAGER.name(), Designation.DEVELOPER.name()));
+        model.addAttribute("designations",
+                Arrays.asList(Designation.MANAGER.name(), Designation.DY_MANAGER.name(), Designation.WORKER.name()));
         System.out.println(userById);
         return "edit";
-
     }
 
     @RequestMapping(value = "/editedRecord")
     public void editUser(@ModelAttribute("userDtoObject") UserDto userDtoObject, Model model, HttpServletResponse resp) throws IOException {
-
-        System.out.println(userDtoObject);
-       Integer userId = userDtoObject.getUserId();
-       userService.updateUserById(userId, userDtoObject);
+        Integer userId = userDtoObject.getUserId();
+        userService.updateUserById(userId, userDtoObject);
         List<UserDto> users = userService.getAllUser();
-        model.addAttribute("ListOfUsers",users);
-        resp.sendRedirect("/firstPage");
+        model.addAttribute("ListOfUsers", users);
+        resp.sendRedirect("/home");
     }
 
-    @RequestMapping("/view/{id}")
-    public String updateUser(@PathVariable("id") String userId, Model model) throws IOException {
-
-        UserDto userById = userService.getUserById(Integer.parseInt(userId.substring(3)));
-        model.addAttribute("user", userById);
-        System.out.println(userById);
-        return "view";
-    }
-
-    @RequestMapping(value = "/openPage")
-    public String openPage(){
-        return "openPage";
-    }
-    @RequestMapping("/createRecordBeforeLogin")
+    // TODO: 22/03/23 Please remove unwanted code like /createRecordBeforeLogin, /createUserBeforeLogin and other place too !!
+    /*@RequestMapping("/createRecordBeforeLogin")
     public void createRecordBeforeLogin(@ModelAttribute("user") UserDto user, Model model, HttpServletResponse resp) throws IOException {
         System.out.println(user);
         User interUser = Mapper.mapToUser(user);
@@ -130,15 +124,15 @@ public class MainController {
         userDetailsService.saveUserDetails(interUserDetail);
         System.out.println("user saved");
         List<UserDto> users = userService.getAllUser();
-        model.addAttribute("ListOfUsers",users);
+        model.addAttribute("ListOfUsers", users);
         resp.sendRedirect("/openPage");
     }
 
     @RequestMapping(value = "/createUserBeforeLogin")
-    public String createUserBeforeLogin(Model model){
+    public String createUserBeforeLogin(Model model) {
         Designation[] values = Designation.values();
         model.addAttribute("user", new UserDto());
         model.addAttribute("designations", values);
         return "CreateUserBeforeLogin";
-    }
+    }*/
 }

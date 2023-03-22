@@ -1,6 +1,7 @@
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<form:form action="/createRecordBeforeLogin" modelAttribute="user">
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<form:form action="/createRecord" method="post" modelAttribute="user">
 <table width="20%">
     <tr>
         <td>Email</td>
@@ -30,6 +31,6 @@
 <input type="submit" value="Submit"> <br/>
 </form:form>
 
-<form action="/openPage">
-<input type="submit" value="Go to Open Page" />
+<form action="/home">
+<input type="submit" value="Go Home" />
 </form>

@@ -1,6 +1,6 @@
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<form:form action="/firstPage">
+<form:form action="/home">
 <input type="submit" value="Go Home" />
 </form:form>
 <form:form action="/editedRecord" method="post" modelAttribute="userDtoObject">

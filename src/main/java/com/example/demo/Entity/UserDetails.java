@@ -1,6 +1,7 @@
 package com.example.demo.Entity;
 
 import com.example.demo.Enums.Designation;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 

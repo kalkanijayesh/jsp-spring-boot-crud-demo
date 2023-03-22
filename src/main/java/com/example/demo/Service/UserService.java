@@ -5,6 +5,9 @@ import com.example.demo.Entity.User;
 import com.example.demo.Mapper.Mapper;
 import com.example.demo.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,6 +52,14 @@ public class UserService {
     public UserDto getUserByEmail(String email) {
         Optional<User> user = userRepository.findByEmailId(email);
         return Mapper.mapToUserDtoOptional(user);
+    }
+
+    public String getRoleOfLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        List<String> roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        return (roles.isEmpty()) ? null : roles.get(0);
     }
 
 }
